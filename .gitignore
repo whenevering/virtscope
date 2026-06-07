@@ -1,4 +1,8 @@
 # --- 凭据 / 运行时数据（绝不提交） ---
+virts-list.ini
+virts-list*.ini
+!virts-list.ini.example
+# 旧版残留（保留排除以防误传）
 vm-list.ini
 vm-list*.ini
 !vm-list.ini.example

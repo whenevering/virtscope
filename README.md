@@ -1,50 +1,53 @@
-# VirtScope · 云镜
+# VirtScope
 
-跨虚拟化与容器平台的统一资源检索工具。
+**English** · [中文](README.zh-CN.md) · [Español](README.es.md) · [Français](README.fr.md) · [Deutsch](README.de.md) · [Italiano](README.it.md) · [Português](README.pt.md) · [Русский](README.ru.md)
 
-在同一个 Web 界面中，按名称 / 网络 / IP 等关键字，对多套虚拟化和容器平台做聚合检索，免去登录每个控制台逐个翻找。
+Unified resource search across virtualization and container platforms.
 
-## 项目目标
+Search multiple VMware vCenter / ESXi / KVM / Proxmox / Docker / Kubernetes environments from a single web interface — by VM name, network, IP, or any keyword.
 
-| 类型 | 平台 | 状态 |
+## Supported Platforms
+
+| Type | Platform | Status |
 | --- | --- | --- |
-| 虚拟机 | VMware vCenter | ✅ 已支持 |
-| 虚拟机 | VMware ESXi（直连） | ✅ 已支持 |
-| 虚拟机 | KVM / libvirt | 🚧 规划中 |
-| 虚拟机 | Proxmox VE | 🚧 规划中 |
-| 容器 | Docker | 🚧 规划中 |
-| 容器 | Kubernetes | 🚧 规划中 |
+| VM | VMware vCenter | ✅ Supported |
+| VM | VMware ESXi (direct) | ✅ Supported |
+| VM | KVM / libvirt | 🚧 Planned |
+| VM | Proxmox VE | 🚧 Planned |
+| Container | Docker | 🚧 Planned |
+| Container | Kubernetes | 🚧 Planned |
 
-## 特性
+## Features
 
-- 多端点并发检索，结果聚合到同一张表
-- 关键字支持空格分隔多词 **AND**，每个词均支持 **正则**
-- 同时匹配虚拟机名称与 guest IP（VMware Tools 上报的 IP 列表）
-- 单端点超时、会话表 TTL 与容量上限，长时间运行稳定
-- 零外部前端依赖，单文件 Python 启动；浏览器即用
+- Concurrent multi-endpoint search, aggregated results in one table
+- Space-separated multi-keyword **AND** matching; each term supports **regex**
+- Matches both VM names and guest IP addresses (via VMware Tools)
+- Built-in 8-language UI (English / 中文 / Español / Français / Deutsch / Italiano / Português / Русский)
+- Per-endpoint timeout, session TTL and capacity cap for long-running stability
+- Zero external frontend dependencies — single-file Python; just open the browser
 
-## 环境要求
+## Requirements
 
 - Python 3.10+
-- 网络可达目标 vCenter / ESXi / 后续支持的平台
+- Network access to target vCenter / ESXi / future platforms
 
-## 安装
+## Installation
 
 ```bash
-git clone https://github.com/<your-account>/virtscope.git
+git clone https://github.com/whenevering/virtscope.git
 cd virtscope
 pip install -r requirements.txt
 ```
 
-## 配置
+## Configuration
 
-复制示例配置：
+Copy the sample config:
 
 ```bash
-cp vm-list.ini.example vm-list.ini
+cp virts-list.ini.example virts-list.ini
 ```
 
-按平台分节填入连接信息：
+Add one `[section]` per endpoint:
 
 ```ini
 [vcenter-prod]
@@ -59,34 +62,34 @@ username = root
 password = your-password
 ```
 
-> ⚠️ `vm-list.ini` 含明文凭据，已在 `.gitignore` 中排除，**切勿提交到仓库**。
+> ⚠️ `virts-list.ini` contains plain-text credentials and is excluded by `.gitignore`. **Never commit it.**
 
-## 启动
+## Usage
 
 ```bash
 python virtscope.py
 ```
 
-默认监听 `0.0.0.0:6616`。浏览器打开 `http://127.0.0.1:6616/` 即可使用。
+Listens on `0.0.0.0:6616` by default. Open `http://127.0.0.1:6616/` in your browser.
 
-## 关键字示例
+## Keyword Examples
 
-| 输入 | 含义 |
+| Input | Meaning |
 | --- | --- |
-| `web` | 名称或 IP 中含 "web" |
-| `web 192.168.10` | 同时含 "web" 与 "192.168.10"（AND） |
-| `^db-\d+` | 按正则匹配（命名前缀为 `db-` 后接数字的虚拟机） |
-| 留空 | 列出全部虚拟机 |
+| `web` | Name or IP contains "web" |
+| `web 192.168.10` | Both "web" AND "192.168.10" must match |
+| `^db-\d+` | Regex: names starting with `db-` followed by digits |
+| *(blank)* | List all VMs |
 
-## 路线图
+## Roadmap
 
-- [ ] libvirt / KVM 端点适配（连接串、域元数据、网络接口 IP）
-- [ ] Proxmox VE API 适配
-- [ ] Docker 引擎与 Swarm 服务检索
-- [ ] Kubernetes 多集群 Pod / Service 检索（kubeconfig contexts）
-- [ ] 统一抽象层 `Provider` 接口，新增平台时只需实现少量方法
-- [ ] 结果导出 CSV / JSON
-- [ ] 基本访问控制（Basic Auth / Token）
+- [ ] libvirt / KVM endpoint adapter (connection URI, domain metadata, NIC IPs)
+- [ ] Proxmox VE API adapter
+- [ ] Docker engine and Swarm service search
+- [ ] Kubernetes multi-cluster Pod / Service search (kubeconfig contexts)
+- [ ] Unified `Provider` interface for pluggable platforms
+- [ ] Export results to CSV / JSON
+- [ ] Basic access control (Basic Auth / Token)
 
 ## License
 

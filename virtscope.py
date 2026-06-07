@@ -20,10 +20,11 @@ from pyVmomi import vim, vmodl
 
 
 BASE_DIR = Path(__file__).resolve().parent
-CONFIG_FILE = BASE_DIR / "vm-list.ini"
+CONFIG_FILE = BASE_DIR / "virts-list.ini"
 HISTORY_FILE = BASE_DIR / "history.log"
 PORT = 6616
 PAGE_SIZE = 30
+DEFAULT_LANG = "en"
 
 # 单个端点检索超时（秒）
 ENDPOINT_TIMEOUT = 30
@@ -38,6 +39,260 @@ SESSION_LOCK = threading.Lock()
 SESSION_HISTORIES: "OrderedDict[str, list[str]]" = OrderedDict()
 SESSION_RESULTS: "OrderedDict[str, tuple[str, list, list[str]]]" = OrderedDict()
 SESSION_TIMESTAMPS: dict[str, float] = {}
+
+
+# ---------------------------------------------------------------------------
+# i18n - 多语言翻译
+# ---------------------------------------------------------------------------
+
+TRANSLATIONS: dict[str, dict[str, str]] = {
+    "en": {
+        "title": "VirtScope",
+        "app_name": "VirtScope",
+        "search_btn": "Search",
+        "placeholder": "VM name, IP, or keyword; space = AND each term; regex allowed; blank = list all",
+        "hint": "Examples: <code>web 192.168.10</code> AND match &bull; regex: <code>^db-\\d+</code>",
+        "found_records": "Found {n} matching record(s).",
+        "no_records": "No matching virtual machines found.",
+        "status_title": "Status / Errors",
+        "col_vm": "VM Name",
+        "col_ip": "IP Addresses",
+        "col_vc": "vCenter",
+        "col_esxi": "ESXi Host",
+        "col_pool": "Resource Pool / Cluster",
+        "page_xof_y": "Page {p} / {total}:",
+        "lang_label": "Language",
+        "cfg_missing": "Configuration file not found: {path}",
+        "cfg_section_missing": "Section [{section}] is missing host, username or password.",
+        "cfg_empty": "No usable endpoints in configuration: {path}",
+        "ep_fail": "[{name}] {host} failed. Error type: {etype}; Detail: {reason}.",
+        "ep_timeout": "[{name}] {host} timed out (>{timeout}s).",
+        "ep_error": "[{name}] {host} exception: {etype}: {reason}",
+        "log_search_start": "---\nSearching: {kw} from {ip}",
+        "log_no_result": "No matching records found.",
+        "log_found": "Found {n} matching record(s).",
+        "log_polling": "Polling {n} endpoint(s) (threads={w}, timeout={t}s)",
+        "log_endpoint_ok": "Completed {name} ({host}): {count} hit(s)",
+    },
+    "es": {
+        "title": "VirtScope",
+        "app_name": "VirtScope",
+        "search_btn": "Buscar",
+        "placeholder": "Nombre, IP o palabra clave; espacio = AND; regex permitido; vacío = listar todo",
+        "hint": "Ejemplos: <code>web 192.168.10</code> AND &bull; regex: <code>^db-\\d+</code>",
+        "found_records": "Se encontraron {n} registro(s).",
+        "no_records": "No se encontraron máquinas virtuales coincidentes.",
+        "status_title": "Estado / Errores",
+        "col_vm": "Nombre VM",
+        "col_ip": "Direcciones IP",
+        "col_vc": "vCenter",
+        "col_esxi": "Host ESXi",
+        "col_pool": "Pool / Clúster",
+        "page_xof_y": "Página {p} / {total}:",
+        "lang_label": "Idioma",
+        "cfg_missing": "Archivo de configuración no encontrado: {path}",
+        "cfg_section_missing": "A la sección [{section}] le falta host, usuario o contraseña.",
+        "cfg_empty": "Sin endpoints en configuración: {path}",
+        "ep_fail": "[{name}] {host} falló. Tipo: {etype}; Detalle: {reason}.",
+        "ep_timeout": "[{name}] {host} excedió el tiempo (>{timeout}s).",
+        "ep_error": "[{name}] {host} excepción: {etype}: {reason}",
+        "log_search_start": "---\nBuscando: {kw} desde {ip}",
+        "log_no_result": "Sin registros coincidentes.",
+        "log_found": "Se encontraron {n} registro(s).",
+        "log_polling": "Consultando {n} endpoint(s) (hilos={w}, timeout={t}s)",
+        "log_endpoint_ok": "Completado {name} ({host}): {count} acierto(s)",
+    },
+    "fr": {
+        "title": "VirtScope",
+        "app_name": "VirtScope",
+        "search_btn": "Rechercher",
+        "placeholder": "Nom, IP ou mot-clé ; espace = ET ; regex autorisé ; vide = tout lister",
+        "hint": "Exemples : <code>web 192.168.10</code> ET &bull; regex : <code>^db-\\d+</code>",
+        "found_records": "{n} enregistrement(s) trouvé(s).",
+        "no_records": "Aucune machine virtuelle correspondante.",
+        "status_title": "Statut / Erreurs",
+        "col_vm": "Nom VM",
+        "col_ip": "Adresses IP",
+        "col_vc": "vCenter",
+        "col_esxi": "Hôte ESXi",
+        "col_pool": "Pool / Cluster",
+        "page_xof_y": "Page {p} / {total} :",
+        "lang_label": "Langue",
+        "cfg_missing": "Fichier de configuration introuvable : {path}",
+        "cfg_section_missing": "Section [{section}] manque host, utilisateur ou mot de passe.",
+        "cfg_empty": "Aucun endpoint utilisable : {path}",
+        "ep_fail": "[{name}] {host} a échoué. Type : {etype} ; Détail : {reason}.",
+        "ep_timeout": "[{name}] {host} a dépassé le délai (>{timeout}s).",
+        "ep_error": "[{name}] {host} exception : {etype} : {reason}",
+        "log_search_start": "---\nRecherche : {kw} depuis {ip}",
+        "log_no_result": "Aucun enregistrement correspondant.",
+        "log_found": "{n} enregistrement(s) trouvé(s).",
+        "log_polling": "Interrogation de {n} endpoint(s) (threads={w}, timeout={t}s)",
+        "log_endpoint_ok": "Terminé {name} ({host}) : {count} résultat(s)",
+    },
+    "de": {
+        "title": "VirtScope",
+        "app_name": "VirtScope",
+        "search_btn": "Suchen",
+        "placeholder": "Name, IP oder Stichwort; Leerzeichen = UND; Regex erlaubt; leer = alles auflisten",
+        "hint": "Beispiele: <code>web 192.168.10</code> UND &bull; regex: <code>^db-\\d+</code>",
+        "found_records": "{n} Datensatz/Datensätze gefunden.",
+        "no_records": "Keine passenden virtuellen Maschinen gefunden.",
+        "status_title": "Status / Fehler",
+        "col_vm": "VM-Name",
+        "col_ip": "IP-Adressen",
+        "col_vc": "vCenter",
+        "col_esxi": "ESXi-Host",
+        "col_pool": "Ressourcen-Pool / Cluster",
+        "page_xof_y": "Seite {p} / {total}:",
+        "lang_label": "Sprache",
+        "cfg_missing": "Konfigurationsdatei nicht gefunden: {path}",
+        "cfg_section_missing": "Abschnitt [{section}] fehlt Host, Benutzer oder Passwort.",
+        "cfg_empty": "Keine verwendbaren Endpunkte: {path}",
+        "ep_fail": "[{name}] {host} fehlgeschlagen. Typ: {etype}; Detail: {reason}.",
+        "ep_timeout": "[{name}] {host} Zeitüberschreitung (>{timeout}s).",
+        "ep_error": "[{name}] {host} Ausnahme: {etype}: {reason}",
+        "log_search_start": "---\nSuche: {kw} von {ip}",
+        "log_no_result": "Keine passenden Datensätze.",
+        "log_found": "{n} Datensatz/Datensätze gefunden.",
+        "log_polling": "Abfrage {n} Endpunkt(e) (Threads={w}, Timeout={t}s)",
+        "log_endpoint_ok": "Abgeschlossen {name} ({host}): {count} Treffer",
+    },
+    "it": {
+        "title": "VirtScope",
+        "app_name": "VirtScope",
+        "search_btn": "Cerca",
+        "placeholder": "Nome, IP o parola chiave; spazio = E; regex ammesso; vuoto = elenca tutto",
+        "hint": "Esempi: <code>web 192.168.10</code> E &bull; regex: <code>^db-\\d+</code>",
+        "found_records": "Trovati {n} record.",
+        "no_records": "Nessuna macchina virtuale corrispondente.",
+        "status_title": "Stato / Errori",
+        "col_vm": "Nome VM",
+        "col_ip": "Indirizzi IP",
+        "col_vc": "vCenter",
+        "col_esxi": "Host ESXi",
+        "col_pool": "Pool / Cluster",
+        "page_xof_y": "Pagina {p} / {total}:",
+        "lang_label": "Lingua",
+        "cfg_missing": "File di configurazione non trovato: {path}",
+        "cfg_section_missing": "Sezione [{section}] manca host, utente o password.",
+        "cfg_empty": "Nessun endpoint utilizzabile: {path}",
+        "ep_fail": "[{name}] {host} non riuscito. Tipo: {etype}; Dettaglio: {reason}.",
+        "ep_timeout": "[{name}] {host} timeout (>{timeout}s).",
+        "ep_error": "[{name}] {host} eccezione: {etype}: {reason}",
+        "log_search_start": "---\nRicerca: {kw} da {ip}",
+        "log_no_result": "Nessun record corrispondente.",
+        "log_found": "Trovati {n} record.",
+        "log_polling": "Interrogazione {n} endpoint (thread={w}, timeout={t}s)",
+        "log_endpoint_ok": "Completato {name} ({host}): {count} risultato/i",
+    },
+    "pt": {
+        "title": "VirtScope",
+        "app_name": "VirtScope",
+        "search_btn": "Pesquisar",
+        "placeholder": "Nome, IP ou palavra-chave; espaço = E; regex permitido; vazio = listar tudo",
+        "hint": "Exemplos: <code>web 192.168.10</code> E &bull; regex: <code>^db-\\d+</code>",
+        "found_records": "{n} registro(s) encontrado(s).",
+        "no_records": "Nenhuma máquina virtual correspondente.",
+        "status_title": "Estado / Erros",
+        "col_vm": "Nome da VM",
+        "col_ip": "Endereços IP",
+        "col_vc": "vCenter",
+        "col_esxi": "Host ESXi",
+        "col_pool": "Pool / Cluster",
+        "page_xof_y": "Página {p} / {total}:",
+        "lang_label": "Idioma",
+        "cfg_missing": "Ficheiro de configuração não encontrado: {path}",
+        "cfg_section_missing": "Secção [{section}] falta host, utilizador ou palavra-passe.",
+        "cfg_empty": "Sem endpoints utilizáveis: {path}",
+        "ep_fail": "[{name}] {host} falhou. Tipo: {etype}; Detalhe: {reason}.",
+        "ep_timeout": "[{name}] {host} excedeu o tempo (>{timeout}s).",
+        "ep_error": "[{name}] {host} excepção: {etype}: {reason}",
+        "log_search_start": "---\nPesquisa: {kw} de {ip}",
+        "log_no_result": "Sem registos correspondentes.",
+        "log_found": "{n} registro(s) encontrado(s).",
+        "log_polling": "A consultar {n} endpoint(s) (threads={w}, timeout={t}s)",
+        "log_endpoint_ok": "Concluído {name} ({host}): {count} resultado(s)",
+    },
+    "ru": {
+        "title": "VirtScope",
+        "app_name": "VirtScope",
+        "search_btn": "Поиск",
+        "placeholder": "Имя, IP или ключевое слово; пробел = И; regex допустим; пусто = все",
+        "hint": "Примеры: <code>web 192.168.10</code> И &bull; regex: <code>^db-\\d+</code>",
+        "found_records": "Найдено {n} запись(ей).",
+        "no_records": "Совпадающих виртуальных машин не найдено.",
+        "status_title": "Статус / Ошибки",
+        "col_vm": "Имя ВМ",
+        "col_ip": "IP-адреса",
+        "col_vc": "vCenter",
+        "col_esxi": "Хост ESXi",
+        "col_pool": "Пул / Кластер",
+        "page_xof_y": "Страница {p} / {total}:",
+        "lang_label": "Язык",
+        "cfg_missing": "Файл конфигурации не найден: {path}",
+        "cfg_section_missing": "В секции [{section}] отсутствует host, username или password.",
+        "cfg_empty": "Нет доступных эндпоинтов: {path}",
+        "ep_fail": "[{name}] {host} ошибка. Тип: {etype}; Подробности: {reason}.",
+        "ep_timeout": "[{name}] {host} превышен таймаут (>{timeout}s).",
+        "ep_error": "[{name}] {host} исключение: {etype}: {reason}",
+        "log_search_start": "---\nПоиск: {kw} с {ip}",
+        "log_no_result": "Совпадающих записей не найдено.",
+        "log_found": "Найдено {n} запись(ей).",
+        "log_polling": "Опрос {n} эндпоинт(ов) (потоки={w}, таймаут={t}s)",
+        "log_endpoint_ok": "Завершено {name} ({host}): {count} совпадение(ий)",
+    },
+    "zh-CN": {
+        "title": "VirtScope - 云镜",
+        "app_name": "VirtScope - 云镜",
+        "search_btn": "搜索",
+        "placeholder": "支持名称或 IP 关键字；空格分隔多词为 AND；每个词可写正则；留空搜索全部",
+        "hint": "示例：<code>web 192.168.10</code> 表示同时包含 web 与 192.168.10；正则示例：<code>^db-\\d+</code>",
+        "found_records": "找到 {n} 条匹配记录。",
+        "no_records": "没有找到匹配的虚拟机记录。",
+        "status_title": "状态 / 错误信息",
+        "col_vm": "虚拟机完整名称",
+        "col_ip": "IP 地址",
+        "col_vc": "所在 vCenter",
+        "col_esxi": "所在 ESXi 主机",
+        "col_pool": "资源池 / 集群路径",
+        "page_xof_y": "第 {p} / {total} 页：",
+        "lang_label": "语言",
+        "cfg_missing": "未找到配置文件：{path}",
+        "cfg_section_missing": "配置节 [{section}] 缺少 host、username 或 password。",
+        "cfg_empty": "配置文件中没有可用的主机配置：{path}",
+        "ep_fail": "[{name}] {host} 检索失败。错误类型：{etype}；详细原因：{reason}；请检查主机地址、网络连通性、端口、用户名密码、账号权限及证书/协议兼容性。",
+        "ep_timeout": "[{name}] {host} 检索超时（>{timeout}s），已放弃。",
+        "ep_error": "[{name}] {host} 异常：{etype}: {reason}",
+        "log_search_start": "---\n开始搜索：{kw}，客户端IP：{ip}",
+        "log_no_result": "没有找到匹配的虚拟机记录。",
+        "log_found": "找到 {n} 条匹配记录。",
+        "log_polling": "并发检索 {n} 个端点（线程数={w}，单端点超时={t}s）",
+        "log_endpoint_ok": "完成 {name} ({host})：命中 {count} 条",
+    },
+}
+
+LANGUAGES = [
+    ("en", "English"),
+    ("es", "Español"),
+    ("fr", "Français"),
+    ("de", "Deutsch"),
+    ("it", "Italiano"),
+    ("pt", "Português"),
+    ("ru", "Русский"),
+    ("zh-CN", "中文"),
+]
+
+
+def t(lang: str, key: str, **kwargs: object) -> str:
+    """Look up a translated string and optionally format with kwargs."""
+    value = TRANSLATIONS.get(lang, {}).get(key) or TRANSLATIONS[DEFAULT_LANG].get(key, key)
+    return value.format(**kwargs) if kwargs else value
+
+
+# ---------------------------------------------------------------------------
+# 数据类
+# ---------------------------------------------------------------------------
 
 
 @dataclass
@@ -56,10 +311,6 @@ class VmRecord:
     resource_path: str
     vm_name: str
     ip_addresses: list[str] = field(default_factory=list)
-
-
-class VmSearchError(Exception):
-    pass
 
 
 # ---------------------------------------------------------------------------
@@ -107,10 +358,10 @@ class KeywordMatcher:
 # ---------------------------------------------------------------------------
 
 
-def load_endpoints() -> list[Endpoint]:
+def load_endpoints(lang: str = DEFAULT_LANG) -> list[Endpoint]:
     parser = configparser.ConfigParser()
     if not CONFIG_FILE.exists():
-        raise VmSearchError(f"未找到配置文件：{CONFIG_FILE}")
+        raise FileNotFoundError(t(lang, "cfg_missing", path=CONFIG_FILE))
 
     parser.read(CONFIG_FILE, encoding="utf-8")
     endpoints: list[Endpoint] = []
@@ -122,12 +373,12 @@ def load_endpoints() -> list[Endpoint]:
         port = parser.getint(section, "port", fallback=443)
 
         if not host or not username or not password:
-            raise VmSearchError(f"配置节 [{section}] 缺少 host、username 或 password。")
+            raise ValueError(t(lang, "cfg_section_missing", section=section))
 
         endpoints.append(Endpoint(section, host, username, password, port))
 
     if not endpoints:
-        raise VmSearchError(f"配置文件中没有可用的主机配置：{CONFIG_FILE}")
+        raise ValueError(t(lang, "cfg_empty", path=CONFIG_FILE))
 
     return endpoints
 
@@ -243,11 +494,10 @@ def _smart_connect(endpoint: Endpoint):
     try:
         return SmartConnect(httpConnectionTimeout=ENDPOINT_TIMEOUT, **base_kwargs)
     except TypeError:
-        # 老版本 pyVmomi 不支持 httpConnectionTimeout
         return SmartConnect(**base_kwargs)
 
 
-def search_endpoint(endpoint: Endpoint, matcher: KeywordMatcher) -> tuple[list[VmRecord], list[str]]:
+def search_endpoint(endpoint: Endpoint, matcher: KeywordMatcher, lang: str = DEFAULT_LANG) -> tuple[list[VmRecord], list[str]]:
     errors: list[str] = []
     si = None
     try:
@@ -330,11 +580,8 @@ def search_endpoint(endpoint: Endpoint, matcher: KeywordMatcher) -> tuple[list[V
             )
         return records, errors
     except Exception as exc:
-        errors.append(
-            f"[{endpoint.name}] {endpoint.host} 检索失败。"
-            f"错误类型：{type(exc).__name__}；详细原因：{exc}；"
-            "请检查主机地址、网络连通性、端口、用户名密码、账号权限及证书/协议兼容性。"
-        )
+        errors.append(t(lang, "ep_fail", name=endpoint.name, host=endpoint.host,
+                        etype=type(exc).__name__, reason=exc))
         return [], errors
     finally:
         if si is not None:
@@ -344,29 +591,27 @@ def search_endpoint(endpoint: Endpoint, matcher: KeywordMatcher) -> tuple[list[V
                 pass
 
 
-def search_all(keyword: str, client_ip: str) -> tuple[list[VmRecord], list[str], list[str]]:
+def search_all(keyword: str, client_ip: str, lang: str = DEFAULT_LANG) -> tuple[list[VmRecord], list[str], list[str]]:
     matcher = KeywordMatcher(keyword)
     records: list[VmRecord] = []
     errors: list[str] = []
-    events: list[str] = ["-" * 80, f"开始搜索：{keyword or '全部虚拟机'}，客户端IP：{client_ip}"]
+    events: list[str] = ["-" * 80, t(lang, "log_search_start", kw=keyword or t(lang, "no_records"), ip=client_ip)]
 
     try:
-        endpoints = load_endpoints()
+        endpoints = load_endpoints(lang)
     except Exception as exc:
         errors.append(str(exc))
-        events.append("没有找到匹配的虚拟机记录。")
+        events.append(t(lang, "log_no_result"))
         events.extend(errors)
         append_history(events)
         return [], errors, events
 
     workers = max(1, min(MAX_ENDPOINT_WORKERS, len(endpoints)))
-    events.append(
-        f"并发检索 {len(endpoints)} 个端点（线程数={workers}，单端点超时={ENDPOINT_TIMEOUT}s）"
-    )
+    events.append(t(lang, "log_polling", n=len(endpoints), w=workers, t=ENDPOINT_TIMEOUT))
 
     with ThreadPoolExecutor(max_workers=workers, thread_name_prefix="vmq") as executor:
         future_map = {
-            executor.submit(search_endpoint, endpoint, matcher): endpoint
+            executor.submit(search_endpoint, endpoint, matcher, lang): endpoint
             for endpoint in endpoints
         }
         for future in as_completed(future_map):
@@ -374,29 +619,24 @@ def search_all(keyword: str, client_ip: str) -> tuple[list[VmRecord], list[str],
             try:
                 ep_records, ep_errors = future.result(timeout=ENDPOINT_TIMEOUT)
             except FuturesTimeoutError:
-                errors.append(
-                    f"[{endpoint.name}] {endpoint.host} 检索超时（>{ENDPOINT_TIMEOUT}s），已放弃。"
-                )
+                errors.append(t(lang, "ep_timeout", name=endpoint.name, host=endpoint.host, timeout=ENDPOINT_TIMEOUT))
                 continue
             except Exception as exc:
-                errors.append(
-                    f"[{endpoint.name}] {endpoint.host} 异常：{type(exc).__name__}: {exc}"
-                )
+                errors.append(t(lang, "ep_error", name=endpoint.name, host=endpoint.host,
+                                etype=type(exc).__name__, reason=exc))
                 continue
 
             records.extend(ep_records)
             errors.extend(ep_errors)
-            events.append(
-                f"完成 {endpoint.name} ({endpoint.host})：命中 {len(ep_records)} 条"
-            )
+            events.append(t(lang, "log_endpoint_ok", name=endpoint.name, host=endpoint.host, count=len(ep_records)))
 
     if records:
-        events.append(f"找到 {len(records)} 条匹配记录。")
+        events.append(t(lang, "log_found", n=len(records)))
         events.extend(
             f"VC:{r.vcenter}-ESXi:{r.esxi_host}-VM:{r.vm_name}" for r in records
         )
     else:
-        events.append("没有找到匹配的虚拟机记录。")
+        events.append(t(lang, "log_no_result"))
 
     events.extend(errors)
     append_history(events)
@@ -500,6 +740,7 @@ def render_page(
     session_history: str = "",
     page_number: int = 1,
     searched: bool = False,
+    lang: str = DEFAULT_LANG,
 ) -> bytes:
     records = records or []
     errors = errors or []
@@ -511,9 +752,9 @@ def render_page(
     escaped_keyword = html.escape(keyword, quote=True)
 
     if searched and total_records:
-        status_html = f'<p class="ok">找到 {total_records} 条匹配记录。</p>'
+        status_html = f'<p class="ok">{t(lang, "found_records", n=total_records)}</p>'
     elif searched:
-        status_html = '<p class="empty">没有找到匹配的虚拟机记录。</p>'
+        status_html = f'<p class="empty">{t(lang, "no_records")}</p>'
     else:
         status_html = ""
 
@@ -533,6 +774,19 @@ def render_page(
         for record in page_records
     )
 
+    # 语言选择器
+    lang_options = "".join(
+        f'<option value="{code}"{" selected" if code == lang else ""}>{label}</option>'
+        for code, label in LANGUAGES
+    )
+    lang_switcher = (
+        '<form method="post" action="/lang" style="display:inline">'
+        f'<label>{t(lang, "lang_label")}: '
+        f'<select name="lang" onchange="this.form.submit()">'
+        f'{lang_options}'
+        f'</select></label></form>'
+    )
+
     table_html = ""
     if searched:
         pagination_html = ""
@@ -543,7 +797,11 @@ def render_page(
                     links.append(f'<span class="current-page">{number}</span>')
                 else:
                     links.append(f'<a href="/?page={number}">{number}</a>')
-            pagination_html = f'<div class="pagination">第 {page_number} / {total_pages} 页：{" ".join(links)}</div>'
+            pagination_html = (
+                f'<div class="pagination">'
+                f'{t(lang, "page_xof_y", p=page_number, total=total_pages)}'
+                f'{" ".join(links)}</div>'
+            )
 
         table_html = f"""
         <table id="result-table">
@@ -556,11 +814,11 @@ def render_page(
             </colgroup>
             <thead>
                 <tr>
-                    <th>虚拟机完整名称<span class="resize-handle"></span></th>
-                    <th>IP 地址<span class="resize-handle"></span></th>
-                    <th>所在 vCenter<span class="resize-handle"></span></th>
-                    <th>所在 ESXi 主机<span class="resize-handle"></span></th>
-                    <th>资源池/集群路径<span class="resize-handle"></span></th>
+                    <th>{t(lang, "col_vm")}<span class="resize-handle"></span></th>
+                    <th>{t(lang, "col_ip")}<span class="resize-handle"></span></th>
+                    <th>{t(lang, "col_vc")}<span class="resize-handle"></span></th>
+                    <th>{t(lang, "col_esxi")}<span class="resize-handle"></span></th>
+                    <th>{t(lang, "col_pool")}<span class="resize-handle"></span></th>
                 </tr>
             </thead>
             <tbody>{rows}</tbody>
@@ -569,10 +827,10 @@ def render_page(
         """
 
     page = f"""<!doctype html>
-<html lang="zh-CN">
+<html lang="{html.escape(lang, quote=True)}">
 <head>
 <meta charset="utf-8">
-<title>VirtScope - 云镜</title>
+<title>{t(lang, "title")}</title>
 <style>
 * {{ box-sizing: border-box; }}
 body {{
@@ -594,8 +852,14 @@ body {{
     box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
     padding: 20px;
 }}
-h1 {{
-    margin: 0 0 18px;
+.card-header {{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+}}
+.card-header h1 {{
+    margin: 0;
     font-size: 26px;
 }}
 .search-row {{
@@ -706,6 +970,12 @@ tbody tr:nth-child(odd) {{ background: #ffffff; }}
     margin: 8px 0 0;
     padding-left: 22px;
 }}
+select {{
+    padding: 4px 8px;
+    border: 1px solid #b9c1cc;
+    border-radius: 4px;
+    font-size: 14px;
+}}
 @media (max-width: 700px) {{
     .container {{ margin: 16px auto; }}
     .search-row {{ flex-direction: column; }}
@@ -716,16 +986,19 @@ tbody tr:nth-child(odd) {{ background: #ffffff; }}
 <body>
 <div class="container">
     <div class="card">
-        <h1>VirtScope - 云镜</h1>
+        <div class="card-header">
+            <h1>{t(lang, "app_name")}</h1>
+            <div>{lang_switcher}</div>
+        </div>
         <form method="post" action="/search" class="search-row">
-            <input name="keyword" type="text" value="{escaped_keyword}" placeholder="支持名称或 IP 关键字；空格分隔多词为 AND；每个词可写正则；留空搜索全部" autofocus>
-            <button type="submit">搜索</button>
+            <input name="keyword" type="text" value="{escaped_keyword}" placeholder="{html.escape(t(lang, 'placeholder'), quote=True)}" autofocus>
+            <button type="submit">{t(lang, "search_btn")}</button>
         </form>
-        <p class="hint">示例：<code>web 192.168.10</code> 表示同时包含 “web” 与 “192.168.10”；正则示例：<code>^db-\\d+</code></p>
+        <p class="hint">{t(lang, "hint")}</p>
         <div class="result-wrap">{table_html}</div>
         <div class="status">
             {status_html}{error_html}
-            <h2>状态/错误信息</h2>
+            <h2>{t(lang, "status_title")}</h2>
             <div class="history">{history_html}</div>
         </div>
     </div>
@@ -772,6 +1045,7 @@ class VmSearchHandler(BaseHTTPRequestHandler):
             return
 
         session_id, is_new_session = self.get_session_id()
+        lang = self.get_lang()
         session_history = "" if is_new_session else read_session_history(session_id)
         page_number = self.get_page_number(parsed.query)
         keyword, records, errors = get_session_results(session_id)
@@ -783,22 +1057,46 @@ class VmSearchHandler(BaseHTTPRequestHandler):
                 session_history,
                 page_number,
                 bool(records or errors),
+                lang=lang,
             ),
             session_id,
+            lang,
         )
 
     def do_POST(self) -> None:
+        if self.path == "/lang":
+            # 语言切换请求
+            session_id, _ = self.get_session_id()
+            length = int(self.headers.get("Content-Length", "0"))
+            body = self.rfile.read(length).decode("utf-8")
+            lang = parse_qs(body).get("lang", [DEFAULT_LANG])[0].strip()
+            if lang not in dict(LANGUAGES):
+                lang = DEFAULT_LANG
+            self.send_response(303)
+            self.send_header("Location", "/")
+            self.send_header(
+                "Set-Cookie",
+                f"vmq_lang={lang}; Path=/; SameSite=Lax",
+            )
+            self.send_header(
+                "Set-Cookie",
+                f"vmq_session={session_id}; Path=/; HttpOnly; SameSite=Lax",
+            )
+            self.end_headers()
+            return
+
         if self.path != "/search":
             self.send_error(404, "Not Found")
             return
 
         session_id, _is_new_session = self.get_session_id()
+        lang = self.get_lang()
         length = int(self.headers.get("Content-Length", "0"))
         body = self.rfile.read(length).decode("utf-8")
         keyword = parse_qs(body).get("keyword", [""])[0].strip()
         client_ip = self.client_address[0]
 
-        records, errors, events = search_all(keyword, client_ip)
+        records, errors, events = search_all(keyword, client_ip, lang)
         append_session_history(session_id, events)
         store_session_results(session_id, (keyword, records, errors))
         self.send_html(
@@ -808,8 +1106,10 @@ class VmSearchHandler(BaseHTTPRequestHandler):
                 errors,
                 read_session_history(session_id),
                 searched=True,
+                lang=lang,
             ),
             session_id,
+            lang,
         )
 
     def get_session_id(self) -> tuple[str, bool]:
@@ -820,19 +1120,45 @@ class VmSearchHandler(BaseHTTPRequestHandler):
             return morsel.value, False
         return uuid4().hex, True
 
+    def get_lang(self) -> str:
+        """从 Cookie 或 Accept-Language 头获取语言偏好。"""
+        cookie_header = self.headers.get("Cookie", "")
+        jar = cookies.SimpleCookie(cookie_header)
+        morsel = jar.get("vmq_lang")
+        if morsel and morsel.value:
+            lang = morsel.value
+            if lang in dict(LANGUAGES):
+                return lang
+
+        accept_lang = self.headers.get("Accept-Language", "")
+        for part in accept_lang.split(","):
+            code = part.split(";")[0].strip().lower()
+            if code in dict(LANGUAGES):
+                return code
+            prefix = code.split("-")[0]
+            for full_code, _ in LANGUAGES:
+                if full_code.startswith(prefix + "-"):
+                    return full_code
+
+        return DEFAULT_LANG
+
     def get_page_number(self, query: str) -> int:
         try:
             return max(1, int(parse_qs(query).get("page", ["1"])[0]))
         except ValueError:
             return 1
 
-    def send_html(self, body: bytes, session_id: str) -> None:
+    def send_html(self, body: bytes, session_id: str, lang: str = DEFAULT_LANG) -> None:
         self.send_response(200)
         self.send_header("Content-Type", "text/html; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
         self.send_header(
             "Set-Cookie",
             f"vmq_session={session_id}; Path=/; HttpOnly; SameSite=Lax",
+        )
+        self.send_header(
+            "Set-Cookie",
+            f"vmq_lang={lang}; Path=/; SameSite=Lax",
         )
         self.end_headers()
         self.wfile.write(body)

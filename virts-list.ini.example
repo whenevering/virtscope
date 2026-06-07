@@ -1,0 +1,27 @@
+# VirtScope endpoint configuration sample / 端点配置示例
+#
+# Usage / 用法:
+#   1. Copy this file to virts-list.ini
+#   2. Add one [section] per vCenter / ESXi / future provider
+#   3. The section name is the display label and must be unique
+#
+# WARNING: this file contains plain-text credentials and is excluded by .gitignore.
+# Never commit it to a repository.
+
+[vcenter-prod]
+host = vcenter.example.com
+username = readonly@vsphere.local
+password = change-me
+port = 443
+
+[vcenter-dr]
+host = vcenter-dr.example.com
+username = readonly@vsphere.local
+password = change-me
+port = 443
+
+[esxi-edge-01]
+host = 10.0.0.11
+username = root
+password = change-me
+port = 443
