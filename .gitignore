@@ -1,0 +1,60 @@
+# --- 凭据 / 运行时数据（绝不提交） ---
+vm-list.ini
+vm-list*.ini
+!vm-list.ini.example
+endpoints.ini
+*.local.ini
+* - Copy.*
+*.bak
+history.log
+*.log
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+*.egg
+.eggs/
+pip-wheel-metadata/
+
+# --- 虚拟环境 ---
+.venv/
+venv/
+env/
+ENV/
+
+# --- 测试 / 类型检查 / 覆盖率 ---
+.pytest_cache/
+.mypy_cache/
+.pyre/
+.pytype/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# --- IDE / 编辑器 ---
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# --- 操作系统 ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- kubeconfig / 云凭据（未来 Provider 用） ---
+kubeconfig
+*.kubeconfig
+.kube/
+*.pem
+*.key
