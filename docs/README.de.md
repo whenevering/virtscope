@@ -93,4 +93,4 @@ Hört standardmäßig auf `0.0.0.0:6616`. Öffnen Sie `http://127.0.0.1:6616/` i
 
 ## Lizenz
 
-[MIT](LICENSE)
+[GPL-3.0](LICENSE)

@@ -93,4 +93,4 @@ python virtscope.py
 
 ## Лицензия
 
-[MIT](LICENSE)
+[GPL-3.0](LICENSE)

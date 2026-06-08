@@ -93,4 +93,4 @@ Escucha en `0.0.0.0:6616` por defecto. Abra `http://127.0.0.1:6616/` en su naveg
 
 ## Licencia
 
-[MIT](LICENSE)
+[GPL-3.0](LICENSE)

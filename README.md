@@ -142,4 +142,4 @@ Listens on `0.0.0.0:6616` by default. Open `http://127.0.0.1:6616/` in your brow
 
 ## License
 
-[MIT](LICENSE)
+[GPL-3.0](LICENSE)

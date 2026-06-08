@@ -93,4 +93,4 @@ Escuta em `0.0.0.0:6616` por defeito. Abra `http://127.0.0.1:6616/` no seu naveg
 
 ## Licença
 
-[MIT](LICENSE)
+[GPL-3.0](LICENSE)

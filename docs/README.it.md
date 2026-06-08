@@ -93,4 +93,4 @@ Ascolta su `0.0.0.0:6616` per impostazione predefinita. Apri `http://127.0.0.1:6
 
 ## Licenza
 
-[MIT](LICENSE)
+[GPL-3.0](LICENSE)
