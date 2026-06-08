@@ -6,6 +6,55 @@ Unified resource search across virtualization and container platforms.
 
 Search multiple VMware vCenter / ESXi / KVM / Proxmox / Docker / Kubernetes environments from a single web interface — by VM name, network, IP, or any keyword.
 
+---
+
+## Why VirtScope
+
+### The Age of Heterogeneous Infrastructure
+
+Modern enterprises rarely confine themselves to a single virtualization platform. VMware vSphere governs the production estate; KVM and Proxmox serve cost-sensitive workloads; Docker and Kubernetes orchestrate the cloud-native layer. Each platform is a universe unto itself, with its own console, its own naming conventions, its own way of seeing the world.
+
+### The Needle in Ten Thousand Haystacks
+
+Even when architecture teams meticulously classify business requirements and enforce disciplined naming conventions, reality has a way of humbling order. A mid-size enterprise may harbor thousands of virtual machines across dozens of clusters; add containers, and the count can swell to tens of thousands. When an incident strikes — a network anomaly, a security alert, a capacity investigation — the question is always the same:
+
+> *Where is the resource named `web-prod-03`? Which vCenter does it belong to? What ESXi host runs it? What are its IPs?*
+
+The answer, more often than not, requires logging into three or four consoles, clicking through nested folders, and cross-referencing spreadsheets. Minutes tick by. The incident escalates.
+
+### The Heavyweight Mirage
+
+OpenStack and commercial cloud management platforms promise a unified pane of glass — and deliver a cathedral of complexity. They demand their own databases, message queues, and identity services. They require weeks of deployment and dedicated teams to maintain. And when it comes to container resources, their support is often an afterthought: a thin API wrapper that surfaces pod names but little else.
+
+For many organizations, the cost of building and operating such a platform exceeds the problem it was meant to solve.
+
+### A Different Philosophy
+
+VirtScope takes a contrarian stance: **the best search tool is the one you can deploy in five minutes and forget about.**
+
+- **Single file, zero dependencies.** One Python script. No database. No build step. Run it, open the browser, search.
+- **Concurrent by design.** All configured endpoints are queried in parallel. A search across ten vCenters returns in the time of the slowest one.
+- **Lightweight everywhere.** A few megabytes of memory. No daemons to babysit. No certificates to rotate. It simply sits in the corner and answers questions.
+- **Polyglot from day one.** VMware today, KVM and Proxmox tomorrow, Docker and Kubernetes on the horizon — each added by implementing a single adapter interface. The search experience remains the same.
+
+### When to Reach for VirtScope
+
+| Scenario | Without VirtScope | With VirtScope |
+| --- | --- | --- |
+| Locate a VM by partial name | Log into each vCenter, search manually | Type the name, see all matches across all platforms |
+| Find which ESXi host a VM lives on | Navigate the inventory tree in vSphere Client | One glance at the results table |
+| Identify a VM by its IP address | Check DHCP leases, query VMware Tools manually | Enter the IP fragment, instant match |
+| Investigate during an incident | Context-switch between 4 consoles | One search, all platforms, under 5 seconds |
+
+### Design Principles
+
+1. **Simplicity is a feature, not a limitation.** Every line of code must justify its existence.
+2. **Speed is respect.** An operator's time is sacred; a search tool that makes them wait has already failed.
+3. **Plurality is reality.** Heterogeneous infrastructure is not a problem to be solved — it is a fact to be embraced.
+4. **The tool should disappear.** The best interface is the one the user never thinks about.
+
+---
+
 ## Supported Platforms
 
 | Type | Platform | Status |
