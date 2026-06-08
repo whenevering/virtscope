@@ -1,6 +1,6 @@
 # VirtScope
 
-[English](README.md) · [中文](README.zh-CN.md) · [Español](README.es.md) · [Français](README.fr.md) · [Deutsch](README.de.md) · [Italiano](README.it.md) · [Português](README.pt.md) · **Русский**
+[English](../README.md) · [中文](README.zh-CN.md) · [Español](README.es.md) · [Français](README.fr.md) · [Deutsch](README.de.md) · [Italiano](README.it.md) · [Português](README.pt.md) · **Русский**
 
 Единый поиск ресурсов по платформам виртуализации и контейнеров.
 

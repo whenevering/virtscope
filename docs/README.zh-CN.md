@@ -1,6 +1,6 @@
 # VirtScope · 云镜
 
-[English](README.md) · **中文** · [Español](README.es.md) · [Français](README.fr.md) · [Deutsch](README.de.md) · [Italiano](README.it.md) · [Português](README.pt.md) · [Русский](README.ru.md)
+[English](../README.md) · **中文** · [Español](README.es.md) · [Français](README.fr.md) · [Deutsch](README.de.md) · [Italiano](README.it.md) · [Português](README.pt.md) · [Русский](README.ru.md)
 
 跨虚拟化与容器平台的统一资源检索工具。
 

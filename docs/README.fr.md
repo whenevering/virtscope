@@ -1,6 +1,6 @@
 # VirtScope
 
-[English](README.md) · [中文](README.zh-CN.md) · [Español](README.es.md) · **Français** · [Deutsch](README.de.md) · [Italiano](README.it.md) · [Português](README.pt.md) · [Русский](README.ru.md)
+[English](../README.md) · [中文](README.zh-CN.md) · [Español](README.es.md) · **Français** · [Deutsch](README.de.md) · [Italiano](README.it.md) · [Português](README.pt.md) · [Русский](README.ru.md)
 
 Recherche unifiée de ressources sur les plateformes de virtualisation et de conteneurs.
 
